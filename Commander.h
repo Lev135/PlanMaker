@@ -86,6 +86,8 @@ private slots:
     void setState(CommanderState state);
 private:
     void cmdCreate(const QString &cmd);
+    void listCreateType(const QStringList &list);
+    void listCreatePoint0(const QStringList &list);
     void cmdCreatePoint12(const QString &cmd);
 
     static QPointF getCoords(const QString &xStr, const QString &yStr);

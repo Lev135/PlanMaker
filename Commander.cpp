@@ -96,45 +96,55 @@ void Commander::cmdCreate(const QString &cmd)
 {
     QStringList list = cmd.split(" ", QString::SkipEmptyParts);
     if (list.size() >= 1 && Data::isTypeWord(list[0])) {
-        if (list.size() == 3) { // creating type by "type" & typeName & color
-            QString typeName = list[1], colorStr = list[2];
-            QColor color(colorStr);
-            if (!color.isValid()) {
-                throw UserException(QString("Expected color name, found: \'%1\'").arg(colorStr));
-            }
-            PointType *type = new PointType(color, this);
-            m_data->addType(type, typeName);
-            //return CommanderExit(CommanderExit::ok, QString("type \'%1\' succesfully added").arg(typeName));
-        }
-        else {
-            throw UserException(QString("Expected word \'type\' and 2 args, found \'type\' and %1 args").arg(list.size() - 1));
-        }
+        listCreateType(list);
     }
     else if (1 <= list.size() && list.size() <= 4) { // creating point (by type) or (by type & name) or
                                                      //    (by type & x & y) or (by type & name & x & y)
-        QString typeName = list[0], name;
-        PointType *type = m_data->type(typeName);
-        Point *point = new Point(type, this);
-        if (list.size() >= 3) {
-            QPointF coords = getCoords(list[list.size() - 2], list[list.size() - 1]);
-            point->setCoords(coords);
-        }
-        if (list.size() == 2 || list.size() == 4) {
-            name = list[1];
-        }
-        else {
-            name = QString("%1_%2").arg(type->name()).arg(type->nextId());
-        }
-        m_data->addPoint(point, name);
-        if (list.size() <= 2) {
-            this->setState(S_createPoint1);
-        }
-        else {
-            this->setState(S_create);
-        }
+        listCreatePoint0(list);
     }
     else {
         throw UserException(QString("(1 - 2 args) or (\'type\' and 2 args) were expected, %1 found").arg(list.size()));
+    }
+}
+
+void Commander::listCreateType(const QStringList &list)
+{
+    if (list.size() == 3) { // creating type by "type" & typeName & color
+        QString typeName = list[1], colorStr = list[2];
+        QColor color(colorStr);
+        if (!color.isValid()) {
+            throw UserException(QString("Expected color name, found: \'%1\'").arg(colorStr));
+        }
+        PointType *type = new PointType(color, this);
+        m_data->addType(type, typeName);
+        //return CommanderExit(CommanderExit::ok, QString("type \'%1\' succesfully added").arg(typeName));
+    }
+    else {
+        throw UserException(QString("Expected word \'type\' and 2 args, found \'type\' and %1 args").arg(list.size() - 1));
+    }
+}
+
+void Commander::listCreatePoint0(const QStringList &list)
+{
+    QString typeName = list[0], name;
+    PointType *type = m_data->type(typeName);
+    Point *point = new Point(type, this);
+    if (list.size() >= 3) {
+        QPointF coords = getCoords(list[list.size() - 2], list[list.size() - 1]);
+        point->setCoords(coords);
+    }
+    if (list.size() == 2 || list.size() == 4) {
+        name = list[1];
+    }
+    else {
+        name = QString("%1_%2").arg(type->name()).arg(type->nextId());
+    }
+    m_data->addPoint(point, name);
+    if (list.size() <= 2) {
+        this->setState(S_createPoint1);
+    }
+    else {
+        this->setState(S_create);
     }
 }
 
